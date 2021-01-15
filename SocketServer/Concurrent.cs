@@ -26,10 +26,9 @@ namespace Concurrent {
                 listener.Listen(settings.serverListeningQueue);
                 
                 while (true) {
-                    Console.WriteLine("Waiting for incoming connections ...");
-                    
-                    // Wait for connection
                     Socket connection = listener.Accept();
+
+                    Console.WriteLine("Accepted connection");
 
                     threadLock.WaitOne();
                     numOfClients++;
