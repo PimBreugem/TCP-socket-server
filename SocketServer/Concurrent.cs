@@ -1,6 +1,9 @@
 ﻿using Sequential;
 using System;
-//todo [Assignment]: add required namespaces
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
 
 namespace Concurrent
 {
