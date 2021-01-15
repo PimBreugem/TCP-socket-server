@@ -31,16 +31,21 @@ namespace Concurrent {
                     Console.WriteLine("Accepted connection");
 
                     threadLock.WaitOne();
-                    numOfClients++;
+                    
+                    int id = ++numOfClients;
+
+                    Console.WriteLine("Passed semaphore: " + id);
 
                     // Handle connection on seperate thread
                     new Thread(() => {
                         try {
+                            Console.WriteLine("Handling client: " + id);
                             handleClient(connection);
                         } catch(Exception e) {
                             Console.Out.WriteLine("[Server] Client is not handled correct: {0}", e.Message);
                         } finally {
-                            threadLock.Release();    
+                            threadLock.Release();
+                            Console.WriteLine("Released client: " + id);
                         }
                     }).Start();
                 }

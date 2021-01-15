@@ -42,12 +42,9 @@ namespace Concurrent {
                 }
 
                 Console.Out.WriteLine("\n[ClientSimulator] All clients finished with their communications ... ");
-
                 Thread.Sleep(settings.delayForTermination);
-
-                SimpleClient endClient = new SimpleClient(-1, settings); // this is a terminating client: it will terminate the whole simulation
+                SimpleClient endClient = new SimpleClient(-1, settings);
                 endClient.prepareClient();
-                // todo 13: check what happens in server side after this client.
                 endClient.communicate();
 
             } catch (Exception e) {
