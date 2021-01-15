@@ -8,12 +8,11 @@ namespace Concurrent {
 
     public class ConcurrentServer : SequentialServer {
 
-        // todo [Assignment]: implement required attributes specific for concurrent server
-        public int maxThreads;
+        private Semaphore threadLock;
 
         public ConcurrentServer(Setting settings) : base(settings) {
             // todo [Assignment]: implement required code
-            maxThreads = setting.serverListeningQueue;
+            threadLock = new Semaphore(0, settings.serverListeningQueue);
         }
 
         public override void prepareServer() {
@@ -32,6 +31,7 @@ namespace Concurrent {
                     // Wait for connection
                     Socket connection = listener.Accept();
 
+                    threadLock.WaitOne();
                     numOfClients++;
 
                     // Handle connection on seperate thread
@@ -42,6 +42,8 @@ namespace Concurrent {
                             Console.Out.WriteLine("[Server] Client is not handled correct: {0}", e.Message);
                         }
                     }).Start();
+
+                    threadLock.Release();
                 }
             } catch (Exception e) {
                 Console.Out.WriteLine("[Server] Preparation: {0}", e.Message);
