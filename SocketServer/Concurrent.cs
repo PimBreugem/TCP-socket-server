@@ -13,6 +13,7 @@ namespace Concurrent {
 
         public ConcurrentServer(Setting settings) : base(settings) {
             // todo [Assignment]: implement required code
+            maxThreads = setting.serverListeningQueue;
         }
 
         public override void prepareServer() {
