@@ -9,11 +9,17 @@ namespace Concurrent {
         public Thread workerThread;
 
         public ConcurrentClient(int id, Setting settings) : base(id, settings) {
-            // todo [Assignment]: implement required code
+            //Assign Thread to worker Thread
+            workerThread = new Thread(() => {
+                this.prepareClient();
+                this.communicate();
+            });
+            
         }
 
         public void run() {
-            // todo [Assignment]: implement required code
+            //Run the Thread
+            this.workerThread.Start();
         }
 
     }
@@ -29,22 +35,11 @@ namespace Concurrent {
 
         public void ConcurrentSimulation() {
             try {
-                Console.Out.WriteLine("\n[ClientSimulator] Sequential simulator is going to start with {0}", settings.experimentNumberOfClients);
-                
-                for (int i = 0; i < settings.experimentNumberOfClients; i++) {
-                    new Thread(() => {
-                        clients[i].prepareClient();
-                        clients[i].communicate();
-                    }).Start();
+                for (int i = 0; i < settings.experimentNumberOfClients; i++)
+                {
+                    clients[i] = new ConcurrentClient(i + 1, settings);
+                    clients[i].run();
                 }
-
-                Console.Out.WriteLine("\n[ClientSimulator] All clients finished with their communications ... ");
-                Thread.Sleep(settings.delayForTermination);
-
-                SimpleClient endClient = new SimpleClient(-1, settings);
-
-                endClient.prepareClient();
-                endClient.communicate();
             } catch (Exception e) {
                 Console.Out.WriteLine("[Concurrent Simulator] {0}", e.Message);
             }
