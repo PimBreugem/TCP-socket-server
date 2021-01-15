@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "RJLgCQFg7rUJIz1qHQ3BWYhVAOAtJo/ZGxIC5CpAoG4DkTM7bElLwA8V/V0f7O5jAg3JJa1OuaulIzhyqc+gzw==",
+  "dgSpecHash": "NzfOCJzE+YF8lQUzErGdxW9AyWRgRt/IbBPHsXFrsIiOIX42+BTadOImBifDAtRBvK0/E3xvQu3CrsLOKXNiyA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\31634\\Documents\\GitHub\\Analysis\\ConcurrentCSharp\\SocketClient\\SocketClient.csproj",
+  "projectFilePath": "C:\\Users\\31634\\Documents\\GitHub\\Analysis2-2\\SocketClient\\SocketClient.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\31634\\.nuget\\packages\\system.text.json\\4.7.0\\system.text.json.4.7.0.nupkg.sha512"
   ],

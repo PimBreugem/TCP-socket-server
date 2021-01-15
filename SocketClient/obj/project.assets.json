@@ -47,11 +47,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\31634\\Documents\\GitHub\\Analysis\\ConcurrentCSharp\\SocketClient\\SocketClient.csproj",
+      "projectUniqueName": "C:\\Users\\31634\\Documents\\GitHub\\Analysis2-2\\SocketClient\\SocketClient.csproj",
       "projectName": "SocketClient",
-      "projectPath": "C:\\Users\\31634\\Documents\\GitHub\\Analysis\\ConcurrentCSharp\\SocketClient\\SocketClient.csproj",
+      "projectPath": "C:\\Users\\31634\\Documents\\GitHub\\Analysis2-2\\SocketClient\\SocketClient.csproj",
       "packagesPath": "C:\\Users\\31634\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\31634\\Documents\\GitHub\\Analysis\\ConcurrentCSharp\\SocketClient\\obj\\",
+      "outputPath": "C:\\Users\\31634\\Documents\\GitHub\\Analysis2-2\\SocketClient\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\31634\\AppData\\Roaming\\NuGet\\NuGet.Config",
