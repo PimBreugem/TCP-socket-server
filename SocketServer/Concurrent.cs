@@ -12,7 +12,7 @@ namespace Concurrent {
 
         public ConcurrentServer(Setting settings) : base(settings) {
             // todo [Assignment]: implement required code
-            threadLock = new Semaphore(0, settings.serverListeningQueue);
+            threadLock = new Semaphore(settings.serverListeningQueue, settings.serverListeningQueue);
         }
 
         public override void prepareServer() {
@@ -40,10 +40,10 @@ namespace Concurrent {
                             handleClient(connection);
                         } catch(Exception e) {
                             Console.Out.WriteLine("[Server] Client is not handled correct: {0}", e.Message);
+                        } finally {
+                            threadLock.Release();    
                         }
                     }).Start();
-
-                    threadLock.Release();
                 }
             } catch (Exception e) {
                 Console.Out.WriteLine("[Server] Preparation: {0}", e.Message);
