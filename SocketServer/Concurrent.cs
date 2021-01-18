@@ -3,16 +3,23 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Concurrent {
 
     public class ConcurrentServer : SequentialServer {
 
-        private Semaphore threadLock;
+        private Semaphore clientLock = new Semaphore(1, 1);
+        private Semaphore voteLock = new Semaphore(1, 1);
+        private Dictionary<string, int> votingDict = new Dictionary<string, int>();
 
         public ConcurrentServer(Setting settings) : base(settings) {
-            // todo [Assignment]: implement required code
-            threadLock = new Semaphore(settings.serverListeningQueue, settings.serverListeningQueue);
+            string[] commands = settings.votingList.Split(settings.commands_sep);
+
+            foreach(string command in commands) {
+                votingDict[command] = 0;
+            }
         }
 
         public override void prepareServer() {
@@ -26,26 +33,19 @@ namespace Concurrent {
                 listener.Listen(settings.serverListeningQueue);
                 
                 while (true) {
+                    Console.WriteLine("Waiting for incoming connections ... ");
                     Socket connection = listener.Accept();
 
-                    Console.WriteLine("Accepted connection");
-
-                    threadLock.WaitOne();
-                    
-                    int id = ++numOfClients;
-
-                    Console.WriteLine("Passed semaphore: " + id);
+                    clientLock.WaitOne();
+                    numOfClients++;
+                    clientLock.Release();
 
                     // Handle connection on seperate thread
                     new Thread(() => {
                         try {
-                            Console.WriteLine("Handling client: " + id);
                             handleClient(connection);
                         } catch(Exception e) {
                             Console.Out.WriteLine("[Server] Client is not handled correct: {0}", e.Message);
-                        } finally {
-                            threadLock.Release();
-                            Console.WriteLine("Released client: " + id);
                         }
                     }).Start();
                 }
@@ -55,8 +55,8 @@ namespace Concurrent {
         }
 
         public override string processMessage(string msg) {
-            string replyMsg = Message.confirmed;
 
+            string replyMsg = Message.confirmed;
             Thread.Sleep(settings.serverProcessingTime);
 
             try {
@@ -67,9 +67,46 @@ namespace Concurrent {
                         Console.ResetColor();
                         Console.WriteLine("[Server] END : number of clients communicated -> {0} ", numOfClients);
 
+                        voteLock.WaitOne();
+
+                        //Print command winner
+                        Console.WriteLine("[Server] Results:");
+                        int maxValue = 0;
+                        foreach (KeyValuePair<string, int> commandAndCount in votingDict)
+                        {
+                            Console.WriteLine("[Server] Key = {0}, Value = {1}", commandAndCount.Key, commandAndCount.Value.ToString());
+                            if(maxValue < commandAndCount.Value) { maxValue = commandAndCount.Value; }
+                        }
+                        //Excecute command
+
+                        foreach (KeyValuePair<string, int> commandAndCount in votingDict)
+                        {
+                            if(commandAndCount.Value == maxValue)
+                            {
+                                //Linux commands are not working on windows.
+                                Console.WriteLine("[Server] excecuting: {0}", commandAndCount.Key);
+                            }
+                        }
+
+                        votingDict.Clear();
+                        voteLock.Release();
+
+                        clientLock.WaitOne();
+                        numOfClients = 0;
+                        clientLock.Release();
+
                         break;
                     default:
                         replyMsg = Message.confirmed;
+
+                        // Track clients and votes
+                        voteLock.WaitOne();
+
+                        string command = msg.Split(settings.command_msg_sep)[1];
+                        votingDict.TryGetValue(command, out int votes);
+                        votingDict[command] = ++votes;
+
+                        voteLock.Release();
 
                         Console.ForegroundColor = ConsoleColor.DarkGreen;
                         Console.WriteLine("[Server] received from the client -> {0} ", msg);

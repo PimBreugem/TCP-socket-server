@@ -59,7 +59,10 @@ namespace Sequential {
             this.settings = settings;
             client_id = id;
             // todo 4: implement a piece of code by which a command is selected (randomly) from the provided voting list (check settings)
-            cmd = "[Replace this with a command from the list provided by settings]";
+            //cmd = "[Replace this with a command from the list provided by settings]";
+            string[] commands = settings.votingList.Split(settings.commands_sep);
+            int index = new Random().Next(commands.Length);
+            cmd = commands[index];
             cmd_message = "ClientId="+client_id.ToString()+settings.command_msg_sep+cmd;
 
             this.ipAddress = IPAddress.Parse(settings.serverIPAddress);
