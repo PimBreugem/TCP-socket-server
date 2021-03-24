@@ -22,6 +22,7 @@ namespace Concurrent {
         private Semaphore clientLock = new Semaphore(1, 1);
         private Semaphore voteLock = new Semaphore(1, 1);
         private Dictionary<string, int> votingDict = new Dictionary<string, int>();
+        private List<Thread> threadsList = new List<Thread>();
 
         public ConcurrentServer(Setting settings) : base(settings) {
             string[] commands = settings.votingList.Split(settings.commands_sep);
@@ -46,17 +47,23 @@ namespace Concurrent {
                     Socket connection = listener.Accept();
 
                     clientLock.WaitOne();
-                    numOfClients++;
-                    clientLock.Release();
-
+                    
                     // Handle connection on seperate thread
-                    new Thread(() => {
+                    Thread thread = new Thread(() => {
                         try {
                             handleClient(connection);
                         } catch(Exception e) {
                             Console.Out.WriteLine("[Server] Client is not handled correct: {0}", e.Message);
                         }
-                    }).Start();
+                    });
+
+                    numOfClients++;
+                    threadsList.Add(thread);
+                    Console.Out.WriteLine("[Server] Connection established number is: {0}", numOfClients);
+
+                    thread.Start();
+
+                    clientLock.Release();
                 }
             } catch (Exception e) {
                 Console.Out.WriteLine("[Server] Preparation: {0}", e.Message);
@@ -74,7 +81,7 @@ namespace Concurrent {
                         Console.ForegroundColor = ConsoleColor.DarkRed;
                         Console.WriteLine("[Server] received from the client -> {0} ", msg);
                         Console.ResetColor();
-                        Console.WriteLine("[Server] END : number of clients communicated -> {0} ", numOfClients);
+                        Console.WriteLine("[Server] END : number of clients communicated -> {0} {1} ", numOfClients, threadsList.Count());
 
                         voteLock.WaitOne();
 
@@ -100,8 +107,18 @@ namespace Concurrent {
                         votingDict.Clear();
                         voteLock.Release();
 
+                        // Get thread list
                         clientLock.WaitOne();
+                        
+                        foreach(Thread thread in threadsList) {
+                            if(thread != Thread.CurrentThread) {
+                                thread.Join();
+                            }
+                        }
+
                         numOfClients = 0;
+                        threadsList.Clear();
+
                         clientLock.Release();
 
                         break;
