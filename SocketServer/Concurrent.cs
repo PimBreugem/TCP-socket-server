@@ -78,38 +78,14 @@ namespace Concurrent {
             try {
                 switch (msg) {
                     case Message.terminate:
+                        int totalClients = numOfClients;
+
                         Console.ForegroundColor = ConsoleColor.DarkRed;
                         Console.WriteLine("[Server] received from the client -> {0} ", msg);
-                        Console.ResetColor();
-                        Console.WriteLine("[Server] END : number of clients communicated -> {0} {1} ", numOfClients, threadsList.Count());
 
-                        voteLock.WaitOne();
-
-                        //Print command winner
-                        Console.WriteLine("[Server] Results:");
-                        int maxValue = 0;
-                        foreach (KeyValuePair<string, int> commandAndCount in votingDict)
-                        {
-                            Console.WriteLine("[Server] Key = {0}, Value = {1}", commandAndCount.Key, commandAndCount.Value.ToString());
-                            if(maxValue < commandAndCount.Value) { maxValue = commandAndCount.Value; }
-                        }
-                        //Excecute command
-
-                        foreach (KeyValuePair<string, int> commandAndCount in votingDict)
-                        {
-                            if(commandAndCount.Value == maxValue)
-                            {
-                                //Linux commands are not working on windows.
-                                Console.WriteLine("[Server] excecuting: {0}", commandAndCount.Key);
-                            }
-                        }
-
-                        votingDict.Clear();
-                        voteLock.Release();
-
-                        // Get thread list
+                        // Join voting threads & reset list
                         clientLock.WaitOne();
-                        
+
                         foreach(Thread thread in threadsList) {
                             if(thread != Thread.CurrentThread) {
                                 thread.Join();
@@ -120,6 +96,36 @@ namespace Concurrent {
                         threadsList.Clear();
 
                         clientLock.Release();
+
+                        // Display termination once all vote threads have been joined
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
+                        Console.ResetColor();
+                        Console.WriteLine("[Server] END : number of clients communicated -> {0}", totalClients);
+
+                        // Print command winner
+                        voteLock.WaitOne();
+
+                        Console.WriteLine("[Server] Results:");
+
+                        int maxValue = 0;
+                        foreach (KeyValuePair<string, int> commandAndCount in votingDict) {
+                            Console.WriteLine("[Server] Key = {0}, Value = {1}", commandAndCount.Key, commandAndCount.Value.ToString());
+
+                            if(maxValue < commandAndCount.Value) {
+                                maxValue = commandAndCount.Value;
+                            }
+                        }
+
+                        // Excecute command
+                        foreach (KeyValuePair<string, int> commandAndCount in votingDict) {
+                            if(commandAndCount.Value == maxValue) {
+                                //Linux commands are not working on windows.
+                                Console.WriteLine("[Server] excecuting: {0}", commandAndCount.Key);
+                            }
+                        }
+
+                        votingDict.Clear();
+                        voteLock.Release();
 
                         break;
                     default:
@@ -140,8 +146,9 @@ namespace Concurrent {
 
                         break;
                 }
-            } catch (Exception e) {   
-                Console.Out.WriteLine("[Server] Process Message {0}", e.Message);    
+            } catch (Exception e) {
+                Console.Out.WriteLine("[Server] Process Message {0}", e.Message);
+                Console.WriteLine(e.ToString());
             }
 
             return replyMsg;
